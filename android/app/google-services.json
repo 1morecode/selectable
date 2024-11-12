@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "664518848434",
+    "project_id": "xtranger-1mc",
+    "storage_bucket": "xtranger-1mc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664518848434:android:bdc33c8f6f6d36d709beab",
+        "android_client_info": {
+          "package_name": "com.onemorecode.selectable"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664518848434-u9fd1jc0oifmiqog8mmqh921ftv9ms6e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM1agmgc1v7nSy0GQwsqP_oXHoG1w57WA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664518848434-u9fd1jc0oifmiqog8mmqh921ftv9ms6e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "664518848434-4j5qjanefgggji4p8khbur90cra2cg69.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.onemorecode.xtranger.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664518848434:android:b15858e8ca7a3ce309beab",
+        "android_client_info": {
+          "package_name": "com.onemorecode.xtranger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664518848434-khlqea3d8p51pgct36t2im0ifp3vd2lh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.onemorecode.xtranger",
+            "certificate_hash": "27aca308fb12b3e67d2730d80e9116f4301506db"
+          }
+        },
+        {
+          "client_id": "664518848434-u9fd1jc0oifmiqog8mmqh921ftv9ms6e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM1agmgc1v7nSy0GQwsqP_oXHoG1w57WA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664518848434-u9fd1jc0oifmiqog8mmqh921ftv9ms6e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "664518848434-4j5qjanefgggji4p8khbur90cra2cg69.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.onemorecode.xtranger.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

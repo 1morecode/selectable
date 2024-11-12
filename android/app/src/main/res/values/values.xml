@@ -1,0 +1,9 @@
+<resources>
+    <string name="default_web_client_id">664518848434-u9fd1jc0oifmiqog8mmqh921ftv9ms6e.apps.googleusercontent.com</string>
+<!--    <string name="ga_trackingId">YOUR_TRACKING_ID</string> &lt;!&ndash; Omit if not needed &ndash;&gt;-->
+    <string name="google_api_key">AIzaSyDM1agmgc1v7nSy0GQwsqP_oXHoG1w57WA</string>
+    <string name="firebase_database_url">https://xtranger-1mc.firebaseio.com/</string>
+    <string name="gcm_defaultSenderId">664518848434</string>
+    <string name="google_storage_bucket">xtranger-1mc.appspot.com</string>
+    <string name="project_id">xtranger-1mc</string>
+</resources>
