@@ -37,7 +37,7 @@ class AppState extends ChangeNotifier {
 
   _savePreferences() async {
     await _initialPreferences();
-    _preferences!.setBool(key, isDarkModeOn!);
+    _preferences!.setBool(key, isDarkModeOn);
   }
 
   _loadFromPreferences() async {
@@ -46,8 +46,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  toggleChangeTheme() {
-    isDarkModeOn = !isDarkModeOn!;
+  toggleChangeTheme(bool status) {
+    isDarkModeOn = status;
     _savePreferences();
     notifyListeners();
   }

@@ -72,7 +72,7 @@ class RestaurantItem extends StatelessWidget {
                         )),
                         CustomChip(
                           text: "Rating: ${restaurant.rating}",
-                          style: TextStyle(color: colorScheme.secondary, fontSize: 14),
+                          style: TextStyle(color: colorScheme.secondaryContainer, fontSize: 14),
                         )
                       ],
                     ),

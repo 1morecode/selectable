@@ -94,7 +94,7 @@ class AppTheme {
   );
 
   // Dark Theme
-  static const Color _darkPrimaryColor = MyColors.lightBlue;
+  static const Color _darkPrimaryColor = MyColors.lightGrey;
   static const Color _darkPrimaryVariantColor = Colors.blue;
   static const Color _darkOnPrimaryColor = MyColors.darkThemeBlack;
   static const Color _darkSecondaryColor = MyColors.red;
@@ -127,12 +127,12 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
         // brightness: Brightness.dark,
       titleSpacing: 10,
-        backgroundColor: _darkPrimaryColor,
+        backgroundColor: _darkOnPrimaryColor,
         iconTheme: IconThemeData(
-          color: _darkOnPrimaryColor,
+          color: _darkPrimaryColor,
         ),
         titleTextStyle: TextStyle(
-            color: _darkOnPrimaryColor,
+            color: _darkPrimaryColor,
             fontSize: 16,
             fontWeight: FontWeight.w500),
         elevation: 1),

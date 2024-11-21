@@ -6,7 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:selectable/helper/global_data.dart';
+import 'package:selectable/model/booking.dart';
 import 'package:selectable/model/table.dart';
+import 'package:selectable/provider/admin/a_booking_provider.dart';
+import 'package:selectable/views/admin/bookings/components/a_booking_item.dart';
 import 'package:selectable/views/widgets/custom_border_container.dart';
 import 'package:selectable/views/widgets/custom_chip.dart';
 
@@ -94,7 +97,9 @@ class _ARestaurantTablesState extends State<ARestaurantTables> {
                           CupertinoButton(
                             color: colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(4),
-                            onPressed: () {},
+                            onPressed: () {
+                              showTableList(context, table);
+                            },
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             minSize: 25,
@@ -258,6 +263,18 @@ class _ARestaurantTablesState extends State<ARestaurantTables> {
                     const SizedBox(
                       height: 10,
                     ),
+                    getFieldTitle("Advance Price *", context),
+                    CupertinoTextField(
+                      controller: restaurantProvider.advanceController,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
+                      placeholder: "Advance Price",
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.text,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -272,6 +289,66 @@ class _ARestaurantTablesState extends State<ARestaurantTables> {
                     ),
                   ],
                 ))
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showTableList(
+      BuildContext context, RestaurantTable? table) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      elevation: 1,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.onPrimary,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.8,
+          child: Consumer<ABookingProvider>(
+            builder: (context, bookingProvider, child) => Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Bookings",
+                        style: TextStyle(
+                            color: colorScheme.onSecondary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      CupertinoButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        padding: const EdgeInsets.all(5),
+                        minSize: 35,
+                        child: const Text("Cancel"),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: colorScheme.onSurface,
+                ),
+                Expanded(child: ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: bookingProvider.getListByTable(table!.id, bookingProvider.bookings).length,
+                  itemBuilder: (context, index) {
+                    Booking booking = bookingProvider.getListByTable(table.id, bookingProvider.bookings)[index];
+                    return ABookingItem(booking: booking);
+                  },
+                ),)
               ],
             ),
           ),

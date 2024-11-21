@@ -37,6 +37,7 @@ dependencies:
   firebase_core: ^3.4.0
   firebase_auth: ^5.2.0 # for Authentication
   cloud_firestore: ^5.4.0 # for Firestore
+  firebase_storage: any
 #  firebase_analytics: ^11.0.0 # for Analytics
   shared_preferences: ^2.2.2
   logger: ^2.4.0
@@ -46,6 +47,12 @@ dependencies:
   cached_network_image: ^3.4.1
   path_provider: ^2.1.5
   carousel_slider: ^5.0.0
+#  checkout_screen_ui: ^1.0.1
+  url_launcher: ^6.3.1
+  dropdown_button2: ^2.3.9
+  permission_handler: ^11.3.0
+  image_picker: ^1.0.7
+  text_form_field_wrapper: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +79,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/tables/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

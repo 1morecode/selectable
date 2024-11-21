@@ -47,5 +47,9 @@
 	<true/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
     <false/>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app requires Gallery access to send photo, videos to peer while chatting.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app requires Camera access to sent media to peer while chatting, clicking a display picture, video calling.</string>
 </dict>
 </plist>

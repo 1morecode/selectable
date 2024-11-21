@@ -10,6 +10,7 @@ import 'package:selectable/provider/admin/a_booking_provider.dart';
 import 'package:selectable/provider/admin/a_restaurant_provider.dart';
 import 'package:selectable/provider/admin/admin_provider.dart';
 import 'package:selectable/provider/auth_provider.dart';
+import 'package:selectable/provider/booking_provider.dart';
 import 'package:selectable/provider/home_provider.dart';
 import 'package:selectable/provider/restaurant_provider.dart';
 import 'package:selectable/splash_screen.dart';
@@ -60,6 +61,9 @@ void main() async {
         ChangeNotifierProvider<RestaurantProvider>(
           create: (_) => RestaurantProvider(),
         ),
+        ChangeNotifierProvider<BookingProvider>(
+          create: (_) => BookingProvider(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -109,7 +113,9 @@ class MyApp extends StatelessWidget {
         EasyLoading.instance
           ..displayDuration = const Duration(milliseconds: 1000)
           ..indicatorType = EasyLoadingIndicatorType.fadingCircle
-          ..loadingStyle = appState.isDarkModeOn ? EasyLoadingStyle.dark : EasyLoadingStyle.light
+          ..loadingStyle = appState.isDarkModeOn
+              ? EasyLoadingStyle.dark
+              : EasyLoadingStyle.light
           ..indicatorSize = 30.0
           ..radius = 10.0
           ..progressColor = Colors.yellow

@@ -2,7 +2,10 @@
 // Created by 1 More Code on 05/11/24.
 //
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,10 +23,13 @@ class AuthService extends ChangeNotifier {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  bool isPhotoLoading = false;
 
   User? get user => _auth.currentUser;
 
   clearFields() {
+    phoneController.clear();
     emailController.clear();
     nameController.clear();
     passwordController.clear();
@@ -58,6 +64,64 @@ class AuthService extends ChangeNotifier {
     return true;
   }
 
+  updateValid() {
+    if (nameController.text.isEmpty) {
+      errorAlert(text: "Enter Name");
+      return false;
+    }
+    if (!phoneRegExp.hasMatch(phoneController.text.trim())) {
+      errorAlert(text: "Enter Valid Phone");
+      return false;
+    }
+    return true;
+  }
+
+  initUpdate() {
+    dynamic user = PreferencesHelper.getUser();
+    if(user != null) {
+      nameController.text = user['name'];
+      phoneController.text = user['phone'];
+    }
+    notifyListeners();
+  }
+
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    try {
+      if(updateValid()){
+        await firebaseFirestore
+            .collection("users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update(data);
+        successAlert(text: "Profile Updated");
+        getUser();
+        return true;
+      }
+    } catch (e) {
+      logger.e(e);
+    }
+    return false;
+  }
+
+  Future<String?> updatePhoto({required File file}) async {
+    try {
+      isPhotoLoading = true;
+      notifyListeners();
+      Reference reference = FirebaseStorage.instance.ref().child(
+          '+PROFILE_PHOTO/${FirebaseAuth.instance.currentUser!.uid}/my_photo.png');
+      TaskSnapshot taskSnapshot = await reference.putFile(file);
+      String url = await taskSnapshot.ref.getDownloadURL();
+      logger.i("URL: $url");
+      isPhotoLoading = false;
+      notifyListeners();
+      return url;
+    } catch (e) {
+      logger.e(e);
+      isPhotoLoading = false;
+      notifyListeners();
+    }
+    return null;
+  }
+
   Future<void> signIn() async {
     try {
       if (loginValid()) {
@@ -72,7 +136,7 @@ class AuthService extends ChangeNotifier {
           if (userDoc.exists && userDoc.get('type') == 'admin') {
             failedAlert(text: "Enter valid credentials!");
             _auth.signOut();
-            return ;
+            return;
           } else if (userDoc.exists) {
             PreferencesHelper.saveUser(userDoc.data());
           } else {
@@ -128,6 +192,7 @@ class AuthService extends ChangeNotifier {
             "email": emailController.text.trim(),
             "name": nameController.text,
             "photoUrl": GlobalData.defaultAvatar,
+            "phone": '',
             "type": "user",
             "createdAt": DateTime.now().millisecondsSinceEpoch,
             "updatedAt": DateTime.now().millisecondsSinceEpoch
@@ -173,7 +238,7 @@ class AuthService extends ChangeNotifier {
                 MaterialPageRoute(
                   builder: (context) => const AdminDashboard(),
                 ),
-                    (route) => false);
+                (route) => false);
           } else {
             _auth.signOut();
             failedAlert(text: "Enter valid credentials!");
@@ -195,23 +260,31 @@ class AuthService extends ChangeNotifier {
   }
 
   getUser() async {
-    DocumentSnapshot userDoc = await firebaseFirestore
-        .collection('users')
-        .doc(_auth.currentUser!.uid)
-        .get();
-    if (userDoc.exists) {
-      PreferencesHelper.saveUser(userDoc.data());
+    try{
+      DocumentSnapshot userDoc = await firebaseFirestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .get();
+      if (userDoc.exists) {
+        PreferencesHelper.saveUser(userDoc.data());
+      }
+      notifyListeners();
+    }catch(e) {
+      logger.e(e);
     }
-    notifyListeners();
   }
 
-  updateUser(dynamic data) async {
-    await firebaseFirestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .update(data);
-    getUser();
-  }
+  // updateUser(dynamic data) async {
+  //   try {
+  //     await firebaseFirestore
+  //         .collection("users")
+  //         .doc(_auth.currentUser!.uid)
+  //         .update(data);
+  //     getUser();
+  //   } catch (e) {
+  //     logger.e(e);
+  //   }
+  // }
 
   signOut() {
     customCupertinoAlert(
@@ -223,7 +296,6 @@ class AuthService extends ChangeNotifier {
         onPressed: () {
           _auth.signOut().then((value) {
             clearFields();
-            PreferencesHelper.removeUser();
             notifyListeners();
             Navigator.pushAndRemoveUntil(
                 globalContext(),
@@ -231,6 +303,12 @@ class AuthService extends ChangeNotifier {
                   builder: (context) => const LoginScreen(),
                 ),
                 (route) => false);
+            Future.delayed(
+              const Duration(seconds: 1),
+              () {
+                PreferencesHelper.removeUser();
+              },
+            );
           });
         });
   }

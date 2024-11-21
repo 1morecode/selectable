@@ -52,7 +52,7 @@ class _ARestaurantDetailsState extends State<ARestaurantDetails> {
                   children: const {
                     0: Text("Details", style: TextStyle(fontSize: 16),),
                     1: Text("Tables", style: TextStyle(fontSize: 16),),
-                    2: Text("Orders", style: TextStyle(fontSize: 16),),
+                    2: Text("Bookings", style: TextStyle(fontSize: 16),),
                   },
                   onValueChanged: (value) {
                     if (value != null) {

@@ -1,8 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:selectable/helper/enum.dart';
+
+import '../main.dart';
 
 final Size size =
     MediaQuery.of(globalContext()).size;
@@ -33,6 +38,32 @@ var password3RegExp = RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$");
 var password4RegExp = RegExp(
     r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
 
+String? encodeQueryParameters(Map<String, String> params) {
+  return params.entries
+      .map((MapEntry<String, String> e) =>
+  '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+      .join('&');
+}
+
+getStatusColor(String status) {
+  if(status == BookingStatus.pending.name){
+    return Colors.blue;
+  }
+  if(status == BookingStatus.confirmed.name){
+    return Colors.orangeAccent;
+  }
+  if(status == BookingStatus.completed.name){
+    return Colors.green;
+  }
+  if(status == BookingStatus.cancelled.name){
+    return Colors.pink;
+  }
+  if(status == BookingStatus.declined.name){
+    return Colors.redAccent;
+  }
+  return Colors.grey;
+}
+
 
 class GlobalData {
   GlobalData._();
@@ -61,5 +92,51 @@ class GlobalData {
   static DateTime convertToDateTime(String date) {
     DateTime res = DateTime.parse(date);
     return res;
+  }
+}
+
+
+checkPermission(Permission permission) async {
+  try {
+    logger.e("Status: ${permission.isGranted}");
+    var status = await permission.status;
+    if (!status.isGranted) {
+      status = await permission.request();
+      if (!status.isGranted) {
+        openAppSettings();
+      }
+    }
+    status = await permission.status;
+    logger.e("Status: ${status.isGranted}");
+    if (status.isGranted) {
+      return true;
+    } else if (status.isPermanentlyDenied) {
+      // Permissions denied permanently, take the user to app settings
+      openAppSettings();
+    }
+    return false;
+  } catch (e) {
+    logger.e(e);
+    return false;
+  }
+}
+
+Future<File?> captureImage(
+    ImageSource captureMode, BuildContext context) async {
+  try {
+    bool status = await checkPermission(Permission.storage);
+    File? file;
+    if (status) {
+      ImagePicker picker = ImagePicker();
+
+      XFile? pickedImage = await (picker.pickImage(source: captureMode));
+      if (pickedImage != null) {
+        file = File(pickedImage.path);
+      }
+    }
+    return file;
+  } catch (e) {
+    logger.e(e);
+    return null;
   }
 }

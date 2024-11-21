@@ -33,8 +33,8 @@ class ARestaurantItem extends StatelessWidget {
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: colorScheme.onSecondary.withOpacity(0.5)),
+                  decoration: const BoxDecoration(
+                      color: Colors.black54),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -50,23 +50,26 @@ class ARestaurantItem extends StatelessWidget {
                                   tag: restaurant.id,
                                   child: Text(
                                     restaurant.name,
-                                    style: TextStyle(
-                                        color: colorScheme.onSurface,
+                                    style: const TextStyle(
+                                        color: Colors.white,
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold),
                                   )),
                               Text(
                                 restaurant.description,
-                                style: TextStyle(
-                                    color: colorScheme.onSurface,
+                                style: const TextStyle(
+                                    color: Colors.white,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500),
                               )
                             ],
                           )),
                           Chip(
-                            label: Text("Rating: ${restaurant.rating}"),
-                            backgroundColor: colorScheme.onSecondary,
+                            label: Text("Rating: ${restaurant.rating}", style: TextStyle(
+                                color: colorScheme.onSecondaryContainer,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500),),
+                            backgroundColor: colorScheme.onSurface,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             padding: const EdgeInsets.symmetric(
@@ -83,10 +86,10 @@ class ARestaurantItem extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.share_location,
                             size: 16,
-                            color: colorScheme.onPrimary,
+                            color: Colors.white70,
                           ),
                           const SizedBox(
                             width: 5,
@@ -94,8 +97,8 @@ class ARestaurantItem extends StatelessWidget {
                           Expanded(
                               child: Text(
                             "${restaurant.location.address}, ${restaurant.location.city}, ${restaurant.location.state}",
-                            style: TextStyle(
-                                color: colorScheme.onPrimary,
+                            style: const TextStyle(
+                                color: Colors.white70,
                                 fontSize: 14,
                                 fontWeight: FontWeight.normal),
                           ))

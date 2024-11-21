@@ -9,6 +9,8 @@ import 'package:selectable/helper/alerts.dart';
 import 'package:selectable/main.dart';
 import 'package:selectable/model/restaurant.dart';
 
+import '../../helper/shared_preferences_helper.dart';
+import '../../model/booking.dart';
 import '../../model/table.dart';
 
 class ARestaurantProvider extends ChangeNotifier {
@@ -76,6 +78,7 @@ class ARestaurantProvider extends ChangeNotifier {
   TextEditingController tableTypeController = TextEditingController();
   TextEditingController capacityController = TextEditingController();
   TextEditingController locationController = TextEditingController();
+  TextEditingController advanceController = TextEditingController();
   bool isTableAvailable = true;
   List<RestaurantTable> _tables = [];
 
@@ -134,6 +137,7 @@ class ARestaurantProvider extends ChangeNotifier {
             "tableType": tableTypeController.text,
             "capacity": int.parse(capacityController.text),
             "location": locationController.text,
+            "advance_price": int.parse(advanceController.text),
             "isAvailable": isTableAvailable,
             "createdAt": DateTime.now().toIso8601String(),
             "updatedAt": DateTime.now().toIso8601String(),
@@ -181,6 +185,7 @@ class ARestaurantProvider extends ChangeNotifier {
             "tableType": tableTypeController.text,
             "capacity": int.parse(capacityController.text),
             "location": locationController.text,
+            "advance_price": int.parse(advanceController.text),
             "isAvailable": isTableAvailable,
             "updatedAt": DateTime.now().toIso8601String(), // Update timestamp
           });
@@ -202,6 +207,7 @@ class ARestaurantProvider extends ChangeNotifier {
     tableNumberController.text = table.tableNumber;
     tableTypeController.text = table.tableType;
     locationController.text = table.location;
+    advanceController.text = table.advancePrice.toString();
     capacityController.text = table.capacity.toString();
     isTableAvailable = table.isAvailable;
     notifyListeners();
@@ -222,6 +228,10 @@ class ARestaurantProvider extends ChangeNotifier {
     }
     if (locationController.text.isEmpty) {
       errorAlert(text: "Enter Table Location");
+      return false;
+    }
+    if (advanceController.text.isEmpty) {
+      errorAlert(text: "Enter Advance Price");
       return false;
     }
     return true;
