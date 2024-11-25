@@ -1,6 +1,4 @@
-//
 // Created by 1 More Code on 04/11/24.
-//
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,37 +18,42 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    // Calling the navigate function after the splash screen is loaded
     navigate();
   }
 
+  // Function to handle navigation after the splash screen
   navigate() {
     Future.delayed(const Duration(seconds: 3), () {
+      // Checking if the user is logged in and if user details are available
       if (FirebaseAuth.instance.currentUser != null &&
           PreferencesHelper.getUser() != null) {
+        // If the user is an admin, navigate to the Admin Dashboard
         if (PreferencesHelper.getUser()['type'] == 'admin') {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (context) => const AdminDashboard(),
               ),
-              (route) => false);
+                  (route) => false);  // Removing previous routes from the stack
         } else {
+          // If the user is not an admin, navigate to the Home Screen
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (context) => const HomeScreen(),
               ),
-              (route) => false);
+                  (route) => false);  // Removing previous routes from the stack
         }
       } else {
+        // If the user is not logged in, navigate to the Login Screen
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => const LoginScreen(),
             ),
-            (route) => false);
+                (route) => false);  // Removing previous routes from the stack
       }
     });
   }
@@ -59,19 +62,20 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/logo.png',
-            width: size.width * 0.8,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Displaying the logo image
+              Image.asset(
+                'assets/logo.png',
+                width: size.width * 0.8,  // Setting width as 80% of the screen width
+              ),
+              const Text(
+                "SelecTable",  // Title of the app
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          const Text(
-            "SelecTable",
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    ));
+        ));
   }
 }

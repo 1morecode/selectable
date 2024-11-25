@@ -17,19 +17,28 @@ class LoginScreen extends StatelessWidget {
       builder: (context, authService, child) => Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text('Sign In', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colorScheme.onSecondary),),
+          title: Text(
+            'Sign In',
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSecondary),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Image.asset("assets/logo.png", height: size.height*0.3,),
+              Image.asset(
+                "assets/logo.png",
+                height: size.height * 0.3,
+              ),
               getFieldTitle("Email *", context),
               CupertinoTextField(
                 controller: authService.emailController,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 placeholder: "Enter Email",
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.emailAddress,
@@ -41,7 +50,7 @@ class LoginScreen extends StatelessWidget {
               CupertinoTextField(
                 controller: authService.passwordController,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 placeholder: "********",
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.visiblePassword,
@@ -52,12 +61,17 @@ class LoginScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Expanded(child: CupertinoButton(
+                  Expanded(
+                      child: CupertinoButton(
                     color: colorScheme.primary,
-                    onPressed: () async {
-                      await authService.signIn();
-                    },
-                    child: const Text('Sign In'),
+                    onPressed: authService.isUserLoginLoading
+                        ? null
+                        : () async {
+                            await authService.signIn();
+                          },
+                    child: authService.isUserLoginLoading
+                        ? const CupertinoActivityIndicator()
+                        : const Text('Sign In'),
                   ))
                 ],
               ),
@@ -81,17 +95,22 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: Container(
-          decoration: BoxDecoration(border: Border(top: BorderSide(color: colorScheme.onSurface, width: 1))),
-          child: CupertinoButton(child: const Text("Admin Login"), onPressed: (){
-            authService.clearFields();
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AdminAuthScreen(),
-                )).then((value) {
+          decoration: BoxDecoration(
+              border: Border(
+                  top: BorderSide(color: colorScheme.onSurface, width: 1))),
+          child: CupertinoButton(
+            child: const Text("Admin Login"),
+            onPressed: () {
               authService.clearFields();
-            });
-          },),
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminAuthScreen(),
+                  )).then((value) {
+                authService.clearFields();
+              });
+            },
+          ),
         ),
       ),
     );

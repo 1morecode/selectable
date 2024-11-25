@@ -309,7 +309,7 @@ class _ARestaurantTablesState extends State<ARestaurantTables> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.8,
+          heightFactor: 0.9,
           child: Consumer<ABookingProvider>(
             builder: (context, bookingProvider, child) => Column(
               children: [

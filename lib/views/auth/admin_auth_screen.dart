@@ -52,10 +52,14 @@ class AdminAuthScreen extends StatelessWidget {
                 children: [
                   Expanded(child: CupertinoButton(
                     color: colorScheme.primary,
-                    onPressed: () async {
+                    onPressed: authService.isAdminLoginLoading
+                        ? null
+                        : () async {
                       await authService.adminSignIn();
                     },
-                    child: const Text('Sign In'),
+                    child: authService.isAdminLoginLoading
+                        ? const CupertinoActivityIndicator()
+                        : const Text('Sign In'),
                   ))
                 ],
               ),

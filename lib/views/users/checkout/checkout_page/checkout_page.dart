@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../helper/global_data.dart';
+import '../../../../helper/global_data.dart';
 import '../credit_form/credit_card_form.dart';
 
 import '../models/card_form_results.dart';
@@ -37,9 +36,8 @@ class CheckoutPage extends StatelessWidget {
   /// for transactions using this ui. Transaction security and integrity is
   /// the responsibility of the developer and what ever Third-party transaction
   /// api that developer is using. A great API to use is Stripe
-  CheckoutPage({Key? key, required this.data, this.footer})
-      : _viewModel = _CheckoutViewModel(data: data),
-        super(key: key) {}
+  CheckoutPage({super.key, required this.data, this.footer})
+      : _viewModel = _CheckoutViewModel(data: data) {}
 
   final CheckoutData data;
 

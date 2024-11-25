@@ -4,10 +4,10 @@
 
 import 'dart:io';
 
-import '../../../checkout/checkout_page/checkout_page.dart';
-import '../../../checkout/models/card_form_results.dart';
-import '../../../checkout/models/checkout_result.dart';
-import '../../../checkout/models/price_item.dart';
+import '../../checkout/checkout_page/checkout_page.dart';
+import '../../checkout/models/card_form_results.dart';
+import '../../checkout/models/checkout_result.dart';
+import '../../checkout/models/price_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +15,8 @@ import 'package:selectable/helper/shared_preferences_helper.dart';
 import 'package:selectable/provider/restaurant_provider.dart';
 
 import '../../../../main.dart';
-import '../../../checkout/ui_components/pay_button.dart';
+import '../../checkout/ui_components/pay_button.dart';
+import '../../checkout/ui_components/pay_button.dart';
 
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});

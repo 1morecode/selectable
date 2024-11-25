@@ -118,7 +118,9 @@ class _EditAccountState extends State<EditAccount> {
                 Expanded(
                     child: CupertinoButton(
                   color: colorScheme.primary,
-                  onPressed: () async {
+                  onPressed: authService.isUpdateLoading
+                      ? null
+                      : () async {
                     FocusScope.of(context).unfocus();
                     await authService.updateProfile({
                       "name": authService.nameController.text,
@@ -126,7 +128,9 @@ class _EditAccountState extends State<EditAccount> {
                       "photoUrl": photoUrl
                     });
                   },
-                  child: const Text('Update'),
+                  child: authService.isUpdateLoading
+                      ? const CupertinoActivityIndicator()
+                      : const Text('Update'),
                 ))
               ],
             ),

@@ -73,10 +73,14 @@ class RegisterScreen extends StatelessWidget {
                   Expanded(
                       child: CupertinoButton(
                     color: colorScheme.primary,
-                    onPressed: () async {
+                    onPressed: authService.isUserRegistrationLoading
+                        ? null
+                        : () async {
                       await authService.signUp();
                     },
-                    child: const Text('Sign Up'),
+                    child: authService.isUserRegistrationLoading
+                        ? const CupertinoActivityIndicator()
+                        : const Text('Sign Up'),
                   ))
                 ],
               ),

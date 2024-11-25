@@ -18,24 +18,36 @@ import 'package:selectable/views/auth/login_screen.dart';
 import 'package:selectable/views/users/home_screen.dart';
 
 class AuthService extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth =
+      FirebaseAuth.instance; // Firebase Authentication instance
+  final FirebaseFirestore firebaseFirestore =
+      FirebaseFirestore.instance; // Firestore instance
+
+  // Controllers for managing input fields
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
-  bool isPhotoLoading = false;
+  bool isUserLoginLoading = false;
+  bool isUserRegistrationLoading = false;
+  bool isAdminLoginLoading = false;
+  bool isUpdateLoading = false;
 
+  bool isPhotoLoading = false; // Flag to indicate photo upload progress
+
+  // Getter to retrieve the current user
   User? get user => _auth.currentUser;
 
+  // Clears all input fields
   clearFields() {
     phoneController.clear();
     emailController.clear();
     nameController.clear();
     passwordController.clear();
-    notifyListeners();
+    notifyListeners(); // Notify listeners of the change
   }
 
+  // Validates the login form fields
   loginValid() {
     if (!emailRegExp.hasMatch(emailController.text.trim())) {
       errorAlert(text: "Enter Valid Email");
@@ -48,6 +60,7 @@ class AuthService extends ChangeNotifier {
     return true;
   }
 
+  // Validates the sign-up form fields
   signUpValid() {
     if (nameController.text.isEmpty) {
       errorAlert(text: "Enter Name");
@@ -64,81 +77,102 @@ class AuthService extends ChangeNotifier {
     return true;
   }
 
+  // Validates the profile update fields
   updateValid() {
     if (nameController.text.isEmpty) {
       errorAlert(text: "Enter Name");
       return false;
     }
-    if (!phoneRegExp.hasMatch(phoneController.text.trim())) {
+    if (!phoneSingaporeRegExp.hasMatch(phoneController.text.trim())) {
       errorAlert(text: "Enter Valid Phone");
       return false;
     }
     return true;
   }
 
+  // Initializes the update form fields with the current user's data
   initUpdate() {
-    dynamic user = PreferencesHelper.getUser();
-    if(user != null) {
+    dynamic user = PreferencesHelper.getUser(); // Retrieve stored user data
+    if (user != null) {
       nameController.text = user['name'];
       phoneController.text = user['phone'];
     }
-    notifyListeners();
+    notifyListeners(); // Notify listeners of the change
   }
 
+  // Updates the user's profile data in Firestore
   Future<bool> updateProfile(Map<String, dynamic> data) async {
     try {
-      if(updateValid()){
+      if (updateValid()) {
+        isUpdateLoading = true;
+        notifyListeners();
         await firebaseFirestore
             .collection("users")
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .update(data);
         successAlert(text: "Profile Updated");
-        getUser();
+        getUser(); // Refresh user data
+        isUpdateLoading = false;
+        notifyListeners();
         return true;
       }
     } catch (e) {
-      logger.e(e);
+      logger.e(e); // Log the error
     }
+    isUpdateLoading = false;
+    notifyListeners();
     return false;
   }
 
+  // Updates the user's profile photo in Firebase Storage
   Future<String?> updatePhoto({required File file}) async {
     try {
       isPhotoLoading = true;
-      notifyListeners();
+      notifyListeners(); // Notify listeners that photo upload is in progress
+
+      // Reference to the user's profile photo path in Firebase Storage
       Reference reference = FirebaseStorage.instance.ref().child(
           '+PROFILE_PHOTO/${FirebaseAuth.instance.currentUser!.uid}/my_photo.png');
-      TaskSnapshot taskSnapshot = await reference.putFile(file);
-      String url = await taskSnapshot.ref.getDownloadURL();
+      TaskSnapshot taskSnapshot = await reference.putFile(file); // Upload photo
+      String url =
+          await taskSnapshot.ref.getDownloadURL(); // Retrieve photo URL
+
       logger.i("URL: $url");
       isPhotoLoading = false;
-      notifyListeners();
+      notifyListeners(); // Notify listeners that upload is complete
       return url;
     } catch (e) {
-      logger.e(e);
+      logger.e(e); // Log the error
       isPhotoLoading = false;
       notifyListeners();
     }
     return null;
   }
 
+  // Handles user login
   Future<void> signIn() async {
     try {
       if (loginValid()) {
+        isUserLoginLoading = true;
+        notifyListeners();
         UserCredential userCredential = await _auth.signInWithEmailAndPassword(
             email: emailController.text.trim(),
             password: passwordController.text);
+        isUserLoginLoading = false;
+        notifyListeners();
         if (userCredential.user != null) {
           DocumentSnapshot userDoc = await firebaseFirestore
               .collection('users')
               .doc(userCredential.user!.uid)
               .get();
+
           if (userDoc.exists && userDoc.get('type') == 'admin') {
             failedAlert(text: "Enter valid credentials!");
             _auth.signOut();
             return;
           } else if (userDoc.exists) {
-            PreferencesHelper.saveUser(userDoc.data());
+            PreferencesHelper.saveUser(
+                userDoc.data()); // Save user data locally
           } else {
             var data = {
               "uid": userCredential.user!.uid,
@@ -152,10 +186,11 @@ class AuthService extends ChangeNotifier {
             firebaseFirestore
                 .collection("users")
                 .doc(userCredential.user!.uid)
-                .set(data);
+                .set(data); // Save new user data in Firestore
             PreferencesHelper.saveUser(data);
           }
-          clearFields();
+
+          clearFields(); // Clear input fields
           successAlert(text: "Logged In!");
           Navigator.pushAndRemoveUntil(
               globalContext(),
@@ -168,24 +203,39 @@ class AuthService extends ChangeNotifier {
         }
         notifyListeners();
       }
-    } catch (e) {
-      logger.i(e);
-      if (e.toString().contains('credential is incorrect')) {
-        failedAlert(text: "Enter valid credentials!");
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase errors
+      if (e.code == 'user-not-found') {
+        failedAlert(text: "No account found for this email.");
+      } else if (e.code == 'wrong-password') {
+        failedAlert(text: "Incorrect password. Please try again.");
+      } else if (e.code == 'too-many-requests') {
+        failedAlert(text: "Too many failed attempts. Please try again later.");
       } else {
-        failedAlert(text: "Failed to Login!");
+        failedAlert(text: "Login failed: ${e.message}");
       }
-      rethrow;
+    } catch (e) {
+      // Handle unexpected errors
+      logger.e(e);
+      failedAlert(
+          text: "An unexpected error occurred. Please try again later.");
     }
+    isUserLoginLoading = false;
+    notifyListeners();
   }
 
+  // Handles user sign-up
   Future<void> signUp() async {
     try {
       if (signUpValid()) {
+        isUserRegistrationLoading = true;
+        notifyListeners();
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
                 email: emailController.text.trim(),
                 password: passwordController.text);
+        isUserRegistrationLoading = false;
+        notifyListeners();
         if (userCredential.user != null) {
           var data = {
             "uid": userCredential.user!.uid,
@@ -200,7 +250,7 @@ class AuthService extends ChangeNotifier {
           firebaseFirestore
               .collection("users")
               .doc(userCredential.user!.uid)
-              .set(data);
+              .set(data); // Save new user data in Firestore
           PreferencesHelper.saveUser(data);
           notifyListeners();
           successAlert(text: "Registered Successfully!");
@@ -212,27 +262,67 @@ class AuthService extends ChangeNotifier {
               (route) => false);
         }
       }
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase errors
+      if (e.code == 'user-not-found') {
+        failedAlert(text: "No account found for this email.");
+      } else if (e.code == 'wrong-password') {
+        failedAlert(text: "Incorrect password. Please try again.");
+      } else {
+        failedAlert(text: "Login failed: ${e.message}");
+      }
     } catch (e) {
-      failedAlert(text: "Failed to Register!");
-      rethrow;
+      logger.e(e);
+      failedAlert(
+          text: "An unexpected error occurred. Please try again later.");
+    }
+    isUserRegistrationLoading = false;
+    notifyListeners();
+  }
+
+  // Retrieves the current user's data from Firestore
+  getUser() async {
+    try {
+      DocumentSnapshot userDoc = await firebaseFirestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        PreferencesHelper.saveUser(userDoc.data());
+      }
+      notifyListeners();
+    } catch (e) {
+      logger.e(e);
     }
   }
 
+  // Handles admin login
   Future<void> adminSignIn() async {
     try {
       if (loginValid()) {
+        isAdminLoginLoading = true;
+        notifyListeners();
+        // Authenticate the user with email and password
         UserCredential userCredential = await _auth.signInWithEmailAndPassword(
             email: emailController.text.trim(),
             password: passwordController.text);
+        isAdminLoginLoading = false;
+        notifyListeners();
         if (userCredential.user != null) {
+          // Fetch the user document from Firestore
           DocumentSnapshot userDoc = await firebaseFirestore
               .collection('users')
               .doc(userCredential.user!.uid)
               .get();
+
           if (userDoc.exists && userDoc.get('type') == 'admin') {
+            // Save admin data locally
             PreferencesHelper.saveUser(userDoc.data());
-            clearFields();
+
+            clearFields(); // Clear the input fields
             successAlert(text: "Logged In!");
+            // Navigate to Admin Dashboard
             Navigator.pushAndRemoveUntil(
                 globalContext(),
                 MaterialPageRoute(
@@ -240,52 +330,35 @@ class AuthService extends ChangeNotifier {
                 ),
                 (route) => false);
           } else {
+            // Log out the user if not an admin
+            failedAlert(text: "You are not authorized to log in as admin.");
             _auth.signOut();
-            failedAlert(text: "Enter valid credentials!");
           }
-        } else {
-          failedAlert(text: "Enter valid credentials!");
         }
         notifyListeners();
       }
-    } catch (e) {
-      logger.i(e);
-      if (e.toString().contains('credential is incorrect')) {
-        failedAlert(text: "Enter valid credentials!");
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase errors
+      if (e.code == 'user-not-found') {
+        failedAlert(text: "No account found for this email.");
+      } else if (e.code == 'wrong-password') {
+        failedAlert(text: "Incorrect password. Please try again.");
+      } else if (e.code == 'too-many-requests') {
+        failedAlert(text: "Too many failed attempts. Please try again later.");
       } else {
-        failedAlert(text: "Failed to Login!");
+        failedAlert(text: "Login failed: ${e.message}");
       }
-      rethrow;
-    }
-  }
-
-  getUser() async {
-    try{
-      DocumentSnapshot userDoc = await firebaseFirestore
-          .collection('users')
-          .doc(_auth.currentUser!.uid)
-          .get();
-      if (userDoc.exists) {
-        PreferencesHelper.saveUser(userDoc.data());
-      }
-      notifyListeners();
-    }catch(e) {
+    } catch (e) {
+      // Handle unexpected errors
       logger.e(e);
+      failedAlert(
+          text: "An unexpected error occurred. Please try again later.");
     }
+    isAdminLoginLoading = false;
+    notifyListeners();
   }
 
-  // updateUser(dynamic data) async {
-  //   try {
-  //     await firebaseFirestore
-  //         .collection("users")
-  //         .doc(_auth.currentUser!.uid)
-  //         .update(data);
-  //     getUser();
-  //   } catch (e) {
-  //     logger.e(e);
-  //   }
-  // }
-
+  // Handles user logout
   signOut() {
     customCupertinoAlert(
         title: Text(
@@ -295,7 +368,7 @@ class AuthService extends ChangeNotifier {
         content: "Do you really want to logout?",
         onPressed: () {
           _auth.signOut().then((value) {
-            clearFields();
+            clearFields(); // Clear input fields
             notifyListeners();
             Navigator.pushAndRemoveUntil(
                 globalContext(),
@@ -303,12 +376,9 @@ class AuthService extends ChangeNotifier {
                   builder: (context) => const LoginScreen(),
                 ),
                 (route) => false);
-            Future.delayed(
-              const Duration(seconds: 1),
-              () {
-                PreferencesHelper.removeUser();
-              },
-            );
+            Future.delayed(const Duration(milliseconds: 100), () {
+              PreferencesHelper.removeUser();
+            });
           });
         });
   }

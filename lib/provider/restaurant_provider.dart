@@ -15,62 +15,64 @@ import 'package:selectable/model/table.dart';
 import '../model/booking.dart';
 import '../model/restaurant.dart';
 
+/// Provider to manage restaurant-related operations.
 class RestaurantProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  /// List of all restaurants.
   List<Restaurant> _restaurants = [];
-  Restaurant? _currentRestaurant;
+  Restaurant? _currentRestaurant; // Currently selected restaurant.
 
+  /// Getters for accessing private variables.
   List<Restaurant> get restaurants => _restaurants;
-
   Restaurant? get currentRestaurant => _currentRestaurant;
 
+  /// Updates the currently selected restaurant and notifies listeners.
   updateCurrentRestaurant(Restaurant? restaurant) {
     _currentRestaurant = restaurant;
     notifyListeners();
   }
 
+  /// Fetches all restaurants from Firestore.
   Future<void> fetchRestaurants() async {
+    // Avoid unnecessary re-fetching.
     if (restaurants.isNotEmpty) {
       return;
     }
 
     try {
-      // Fetch the restaurants collection from Firestore
+      // Fetch restaurant documents.
       final restaurantCollection =
-          await _firestore.collection('restaurants').get();
+      await _firestore.collection('restaurants').get();
 
-      // Map the data into a list of restaurant objects
+      // Convert documents to Restaurant objects.
       _restaurants = restaurantCollection.docs.map((doc) {
         return Restaurant.fromJson(doc.data(), doc.id);
       }).toList();
 
-      notifyListeners(); // Notify listeners when restaurants are fetched
+      notifyListeners(); // Notify listeners about the update.
     } catch (e) {
       print('Failed to fetch restaurants: $e');
       throw Exception("Failed to fetch restaurants from Firestore");
     }
   }
 
-  // Fetch Single Restaurant
+  /// Fetches a single restaurant by its ID.
   Future<Restaurant?> fetchRestaurant(id) async {
     try {
-      // Fetch the restaurants collection from Firestore
       final doc = await _firestore.collection('restaurants').doc(id).get();
-
-      // Map the data into a list of restaurant objects
       if (doc.exists && doc.data() != null) {
         updateCurrentRestaurant(Restaurant.fromJson(doc.data()!, doc.id));
         notifyListeners();
         return currentRestaurant;
       }
     } catch (e) {
-      print('Failed to fetch restaurants: $e');
-      // throw Exception("Failed to fetch restaurants from Firestore");
+      print('Failed to fetch restaurant: $e');
     }
     return null;
   }
 
-  // Book Table
+  /// Booking table-related properties and methods.
   TextEditingController dateController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
@@ -92,95 +94,88 @@ class RestaurantProvider extends ChangeNotifier {
   List<Booking> bookings = [];
   Availability? availability;
 
+  /// Handles date selection for booking.
   onSelectDate(DateTime date) {
     if (selectedDate != date) {
       dateController.text = GlobalData.format.format(date);
       selectedDate = date;
 
-      // Get the day of the week from the date
+      // Map date to the corresponding day of the week.
       selectedDay = daysList[date.weekday - 1];
 
-      // Get a copy of the slots for the selected day to avoid modifying the original list
+      // Fetch availability slots for the selected day.
       slotsList = List<String>.from(availability!.availability[selectedDay] ?? []);
 
-      // Filter slots if the selected date is today
-      if (DateFormat('yyyy-MM-dd').format(selectedDate!) == DateFormat('yyyy-MM-dd').format(DateTime.now())) {
+      // Filter slots to exclude past times if the selected date is today.
+      if (DateFormat('yyyy-MM-dd').format(selectedDate!) ==
+          DateFormat('yyyy-MM-dd').format(DateTime.now())) {
         DateTime now = DateTime.now();
         String currentTime = DateFormat('HH:mm').format(now);
 
-        // Only keep future slots
         slotsList = slotsList.where((slot) {
           String startTime = slot.split('-').first;
           return startTime.compareTo(currentTime) > 0;
         }).toList();
       }
 
-      // Logging to help debug
-      logger.i(availability!.availability[selectedDay]);
-      logger.i(selectedDay);
-
-      // Reset selections
+      // Reset selections and notify listeners.
       selectedSlot = null;
       selectedTable = null;
-
-      // Notify listeners to update the UI
       notifyListeners();
     }
   }
 
-
+  /// Handles time slot selection.
   onSelectSlot(String slot) {
     if (selectedSlot != slot) {
       selectedSlot = slot;
       selectedTable = null;
       notifyListeners();
-      fetchBookings();
+      fetchBookings(); // Fetch bookings for the selected slot.
     }
   }
 
+  /// Handles table selection.
   onSelectTable(RestaurantTable table) {
     selectedTable = table;
     notifyListeners();
   }
 
+  /// Fetches available tables for a specific restaurant.
   fetchTables(String id) async {
     try {
-      // Fetch the restaurants collection from Firestore
       final tableCollection = await _firestore
           .collection('tables')
           .where('restaurantId', isEqualTo: id)
           .where('isAvailable', isEqualTo: true)
           .get();
 
-      // Map the data into a list of restaurant objects
       tableList = tableCollection.docs.map((doc) {
         return RestaurantTable.fromJson(doc.data(), doc.id);
       }).toList();
 
-      logger.e(tableList);
-
-      notifyListeners(); // Notify listeners when restaurants are fetched
+      notifyListeners();
     } catch (e) {
-      print('Failed to fetch table: $e');
+      print('Failed to fetch tables: $e');
       throw Exception("Failed to fetch tables from Firestore");
     }
   }
 
-// Function to fetch bookings based on filters
+  /// Fetches bookings for the selected restaurant, date, and slot.
   fetchBookings() async {
     try {
       QuerySnapshot querySnapshot = await _firestore
-          .collection('bookings') // Replace with your collection name
+          .collection('bookings')
           .where('restaurantId', isEqualTo: currentRestaurant!.id)
-          .where('date', isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate!))
+          .where('date',
+          isEqualTo: DateFormat('yyyy-MM-dd').format(selectedDate!))
           .where('timeSlot', isEqualTo: selectedSlot)
           .get();
 
-      // Convert each document to a Booking object
       bookings = querySnapshot.docs.map((doc) {
         return Booking.fromJson(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
-      logger.e("Bookings List: ${bookings.length}");
+
       notifyListeners();
     } catch (e) {
       print('Error fetching bookings: $e');
@@ -188,10 +183,12 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
+  /// Checks if a specific table is already booked.
   bool isTableBooked(String tableId) {
     return bookings.any((booking) => booking.tableId == tableId);
   }
 
+  /// Submits a new booking to Firestore.
   checkout() {
     var data = {
       'restaurantId': currentRestaurant!.id,
@@ -213,27 +210,22 @@ class RestaurantProvider extends ChangeNotifier {
     };
 
     try {
-      // Reference to the Firestore 'bookings' collection
       CollectionReference bookings =
-          FirebaseFirestore.instance.collection('bookings');
+      FirebaseFirestore.instance.collection('bookings');
 
-      // Add a new document to the 'bookings' collection with the booking data
-      bookings.add(data).then(
-        (value) {
-          successAlert(text: "Table Booked Successfully");
-          print("Table Booked successfully");
-          Future.delayed(const Duration(seconds: 2), () {
-            Navigator.of(globalContext()).pop();
-            Navigator.of(globalContext()).pop();
-          },);
-        },
-      );
+      bookings.add(data).then((value) {
+        successAlert(text: "Table Booked Successfully");
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.of(globalContext()).pop();
+          Navigator.of(globalContext()).pop();
+        });
+      });
     } catch (e) {
       errorAlert(text: "Failed to save booking:");
-      print("Failed to save booking: $e");
     }
   }
 
+  /// Clears all booking-related data.
   clearTableData() {
     dateController.clear();
     availability = null;

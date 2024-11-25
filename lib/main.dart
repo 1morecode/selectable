@@ -22,19 +22,26 @@ import 'firebase_options.dart';
 import 'helper/global_data.dart';
 import 'helper/shared_preferences_helper.dart';
 
-bool? themeMode = false;
-Logger logger = Logger();
+// Global variables
+bool? themeMode = false; // Variable to store the theme mode (light or dark)
+Logger logger = Logger(); // Logger instance for logging debug information
 
+// The entry point of the application
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform, // Firebase initialization with platform-specific options
   );
 
+  // Initialize shared preferences
   PreferencesHelper.preferences = await SharedPreferences.getInstance();
 
+  // Override HTTP settings to allow insecure certificates (useful for development purposes)
   HttpOverrides.global = MyHttpOverrides();
+
+  // Run the app wrapped in a MultiProvider to provide various services
   runApp(
     MultiProvider(
       providers: [
@@ -44,7 +51,7 @@ void main() async {
         ChangeNotifierProvider<AuthService>(
           create: (_) => AuthService(),
         ),
-        // Admin
+        // Admin Providers
         ChangeNotifierProvider<ARestaurantProvider>(
           create: (_) => ARestaurantProvider(),
         ),
@@ -54,7 +61,7 @@ void main() async {
         ChangeNotifierProvider<ABookingProvider>(
           create: (_) => ABookingProvider(),
         ),
-        // User
+        // User Providers
         ChangeNotifierProvider<HomeProvider>(
           create: (_) => HomeProvider(),
         ),
@@ -65,21 +72,24 @@ void main() async {
           create: (_) => BookingProvider(),
         ),
       ],
-      child: const MyApp(),
+      child: const MyApp(), // Main App widget
     ),
   );
 }
 
+// Function to check and apply the theme mode from shared preferences
 checkTheme() {
   if (PreferencesHelper.preferences.containsKey("themeMode")) {
     themeMode = PreferencesHelper.preferences.getBool("themeMode");
     if (themeMode!) {
+      // Apply dark theme if themeMode is true
       SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
           systemNavigationBarColor: Colors.black,
           statusBarBrightness: Brightness.dark,
           statusBarColor: Colors.black,
           systemNavigationBarIconBrightness: Brightness.light));
     } else {
+      // Apply light theme if themeMode is false
       SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
           systemNavigationBarColor: Colors.white,
           statusBarBrightness: Brightness.light,
@@ -87,6 +97,7 @@ checkTheme() {
           systemNavigationBarIconBrightness: Brightness.dark));
     }
   } else {
+    // Apply default light theme
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.white,
         statusBarBrightness: Brightness.light,
@@ -95,13 +106,16 @@ checkTheme() {
   }
 }
 
+// The main widget that builds the app
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Consumer widget to rebuild the UI based on the app state (e.g., dark mode)
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        // Set the system UI overlay style based on the current theme mode
         SystemChrome.setSystemUIOverlayStyle(
           SystemUiOverlayStyle(
             systemNavigationBarColor: appState.isDarkModeOn
@@ -110,6 +124,7 @@ class MyApp extends StatelessWidget {
           ),
         );
 
+        // Configure EasyLoading settings (used for loading indicators)
         EasyLoading.instance
           ..displayDuration = const Duration(milliseconds: 1000)
           ..indicatorType = EasyLoadingIndicatorType.fadingCircle
@@ -126,27 +141,29 @@ class MyApp extends StatelessWidget {
           ..userInteractions = true
           ..dismissOnTap = false;
 
+        // Return the MaterialApp widget that holds the entire app
         return MaterialApp(
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          title: 'Court Book',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: appState.isDarkModeOn ? ThemeMode.dark : ThemeMode.light,
-          color: Colors.blue,
-          home: const SplashScreen(),
-          builder: EasyLoading.init(),
+          navigatorKey: navigatorKey, // Global navigator key for navigation control
+          debugShowCheckedModeBanner: false, // Disable the debug banner in the app
+          title: 'Court Book', // Title of the app
+          theme: AppTheme.lightTheme, // Light theme
+          darkTheme: AppTheme.darkTheme, // Dark theme
+          themeMode: appState.isDarkModeOn ? ThemeMode.dark : ThemeMode.light, // Choose theme mode based on app state
+          color: Colors.blue, // Primary color for the app
+          home: const SplashScreen(), // Set the initial screen to SplashScreen
+          builder: EasyLoading.init(), // Initialize EasyLoading
         );
       },
     );
   }
 }
 
+// Custom HTTP override class to allow insecure SSL certificates (for development purposes)
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+          (X509Certificate cert, String host, int port) => true; // Accept all certificates
   }
 }

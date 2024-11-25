@@ -5,19 +5,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:selectable/provider/admin/a_restaurant_provider.dart';
-import 'package:selectable/provider/auth_provider.dart';
 import 'package:selectable/provider/home_provider.dart';
 import 'package:selectable/provider/restaurant_provider.dart';
-import 'package:selectable/uploader/upload_restaurants.dart';
-import 'package:selectable/views/admin/account/a_account.dart';
-import 'package:selectable/views/admin/bookings/a_bookings.dart';
-import 'package:selectable/views/admin/restaurants/a_restaurants.dart';
 import 'package:selectable/views/users/bookings/bookings_page.dart';
 import 'package:selectable/views/users/home/home_page.dart';
 import 'package:selectable/views/users/profile/profile_page.dart';
-
-import '../../provider/admin/admin_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
