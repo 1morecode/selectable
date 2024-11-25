@@ -70,6 +70,10 @@ class AuthService extends ChangeNotifier {
       errorAlert(text: "Enter Valid Email");
       return false;
     }
+    if (!phoneSingaporeRegExp.hasMatch(phoneController.text.trim())) {
+      errorAlert(text: "Enter Valid Phone");
+      return false;
+    }
     if (passwordController.text.isEmpty) {
       errorAlert(text: "Enter Password");
       return false;
@@ -242,7 +246,7 @@ class AuthService extends ChangeNotifier {
             "email": emailController.text.trim(),
             "name": nameController.text,
             "photoUrl": GlobalData.defaultAvatar,
-            "phone": '',
+            "phone": phoneController.text,
             "type": "user",
             "createdAt": DateTime.now().millisecondsSinceEpoch,
             "updatedAt": DateTime.now().millisecondsSinceEpoch

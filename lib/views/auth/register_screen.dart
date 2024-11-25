@@ -29,7 +29,7 @@ class RegisterScreen extends StatelessWidget {
             children: [
               Image.asset(
                 "assets/logo.png",
-                height: size.height * 0.3,
+                height: size.height * 0.2,
               ),
               getFieldTitle("Display Name *", context),
               CupertinoTextField(
@@ -51,6 +51,18 @@ class RegisterScreen extends StatelessWidget {
                 placeholder: "Enter Email",
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              getFieldTitle("Phone *", context),
+              CupertinoTextField(
+                controller: authService.phoneController,
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                placeholder: "Enter Phone",
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.phone,
               ),
               const SizedBox(
                 height: 16,
